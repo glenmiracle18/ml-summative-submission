@@ -1,71 +1,114 @@
-# Neural Network Model Optimization for Freight Cost Prediction in Shipments
+# Freight Cost Prediction Model Analysis
 
-## Model Training Instances and Configuration Details
+## Overview
+This project implements and compares multiple machine learning approaches for freight cost prediction, including various neural network architectures and XGBoost. The models were evaluated on their ability to classify freight costs into different categories.
 
-| Training Instance | Optimizer Used | Regularizer Used | Epochs | Early Stopping | Number of Layers | Learning Rate | Accuracy | F1 Score | Recall | Precision |
-|------------------|----------------|------------------|---------|----------------|-----------------|---------------|-----------|-----------|---------|------------|
-| Instance 1 (Adam_Dropout_BatchNorm) | Adam | Dropout + BatchNorm | 50 | Yes | 3 (64, 32, 3) | 0.001 | 0.71584 | 0.70899 | 0.71584 | 0.70845 |
-| Instance 2 (RMSprop_L2_Deep) | RMSprop | L2 | 50 | Yes | 4 (128, 64, 32, 3) | 0.005 | 0.64795 | 0.61032 | 0.64795 | 0.63419 |
-| Instance 3 (SGD_Momentum_BatchNorm) | SGD | BatchNorm | 50 | Yes | 5 (96, 64, 48, 32, 16, 3) | 0.01 | 0.66471 | 0.65222 | 0.66471 | 0.65507 |
-| Instance 4 (Adam_ElasticNet_Dropout) | Adam | L1 + L2 | 50 | Yes | 4 (128, 96, 64, 32, 3) | 0.002 | 0.33529 | 0.16838 | 0.33529 | 0.11242 |
-| Instance 5 (RMSprop_L1_BatchNorm) | RMSprop | L1 + BatchNorm | 50 | Yes | 4 (64, 48, 32, 3) | 0.001 | 0.72674 | 0.72462 | 0.72674 | 0.72372 |
+## Model Implementations
 
-## Analysis of Optimization Techniques
+### Neural Network Architectures
 
-### Best Performing Model: Instance 5 (RMSprop_L1_BatchNorm)
-![RMSprop_L1_BatchNorm_confusion_matrix](https://github.com/user-attachments/assets/7cdd94ee-7e43-49b0-b338-39ad87f93f4c)
-- Highest accuracy: 0.72674
-- Best F1 Score: 0.72462
-- Most balanced precision-recall trade-off
-- Optimal combination of RMSprop optimizer with L1 regularization and BatchNorm
+| Training Instance | Optimizer Used | Regularizer Used | Early Stopping | Accuracy | Loss | F1 Score | Precision | Recall |
+|------------------|----------------|------------------|----------------|----------|------|-----------|-----------|---------|
+| Adam_Dropout_BatchNorm | Adam | Dropout + BatchNorm | Yes | 0.7158 | 0.6583 | 0.7090 | 0.7084 | 0.7158 |
+| RMSprop_L2_Deep | RMSprop | L2 | Yes | 0.6479 | 0.8250 | 0.6103 | 0.6342 | 0.6479 |
+| SGD_Momentum_BatchNorm | SGD | BatchNorm | Yes | 0.6647 | 0.7683 | 0.6522 | 0.6551 | 0.6647 |
+| Adam_ElasticNet_Dropout | Adam | L1 + L2 | Yes | 0.3353 | 1.0992 | 0.1684 | 0.1124 | 0.3353 |
+| RMSprop_L1_BatchNorm | RMSprop | L1 + BatchNorm | Yes | 0.7267 | 0.7044 | 0.7246 | 0.7237 | 0.7267 |
 
-### Performance Analysis
+![image](https://github.com/user-attachments/assets/ab9592c8-1b07-450c-afec-e8c253b67394)
+![image](https://github.com/user-attachments/assets/963c6bd5-48cc-4797-bb0d-bdea7c02a911)
 
-1. **Optimizer Effectiveness**
-   - RMSprop showed strong performance in Instance 5 (72.67%) and decent performance in Instance 2 (64.79%)
-   - Adam performed well in Instance 1 (71.58%) but poorly in Instance 4 (33.53%)
-   - SGD with momentum achieved moderate performance (66.47%)
+You can see more plot images in the prediction plots directory
 
-2. **Regularization Impact**
-   - BatchNorm + L1 (Instance 5) provided the best regularization strategy
-   - Dropout + BatchNorm (Instance 1) showed strong performance
-   - ElasticNet (L1 + L2) in Instance 4 proved too aggressive, leading to underfitting
-   - Single L2 regularization (Instance 2) showed moderate effectiveness
+### XGBoost Implementation
+Best Parameters:
+- colsample_bytree: 1.0
+- gamma: 0
+- learning_rate: 0.1
+- max_depth: 5
+- min_child_weight: 3
+- n_estimators: [value]
 
-3. **Architecture Considerations**
-   - 4-layer architecture proved optimal (Instance 5)
-   - Deeper networks (5 layers in Instance 3) didn't necessarily improve performance
-   - Layer size progression showed importance of balanced architecture
+Performance Metrics:
+- Best Cross-validation Score: 0.7487
+- Class-wise Performance:
+  - Class 0: Precision=0.80, Recall=0.79, F1=0.80
+  - Class 1: Precision=0.85, Recall=0.81, F1=0.83
+  - Class 2: Precision=0.65, Recall=0.69, F1=0.67
+- Overall Accuracy: 0.76
+- Macro Average: Precision=0.77, Recall=0.76, F1=0.77
+
+## Performance Analysis
+
+### Neural Network Models
+
+1. **Best Performing Configurations**
+   - RMSprop_L1_BatchNorm (72.67% accuracy)
+   - Adam_Dropout_BatchNorm (71.58% accuracy)
+   
+2. **Optimization Techniques Impact**
+   - RMSprop optimizer shows consistent performance across implementations
+   - BatchNorm proves effective when combined with appropriate regularization
+   - L1 regularization with BatchNorm achieves the best balance
+   
+3. **Challenges Identified**
+   - ElasticNet regularization (L1 + L2) severely impacted model performance (33.53% accuracy)
+   - Higher loss values don't necessarily indicate worse performance
+
+### XGBoost Performance
+
+1. **Advantages**
+   - Best overall accuracy (74.87% cross-validation)
+   - More consistent performance across classes
+   - Better handling of class imbalance
+
+2. **Class-wise Analysis**
+   - Strong performance on Class 1 (0.83 F1-score)
+   - Balanced precision and recall for Classes 0 and 1
+   - Slightly lower performance on Class 2
+
+## Comparative Analysis
+
+1. **Model Comparison**
+   - XGBoost achieves the highest accuracy (74.87%)
+   - Best Neural Network close behind (72.67%)
+   - Both approaches show viable performance
+
+2. **Trade-offs**
+   - Neural Networks:
+     - More hyperparameters to tune
+     - Greater variance in performance
+     - Higher potential for improvement with more data
+   - XGBoost:
+     - More stable performance
+     - Better out-of-the-box performance
+     - Easier to tune
+
+## Conclusions and Recommendations
 
 ### Key Findings
+1. XGBoost provides the most reliable performance
+2. Neural networks can achieve comparable results with proper optimization
+3. Regularization strategy significantly impacts neural network performance
 
-1. **Optimal Configuration**
-   - RMSprop optimizer with 0.001 learning rate
-   - L1 regularization combined with BatchNorm
-   - 4-layer architecture with moderate layer sizes
-   - Early stopping implementation
+### Best Practices Identified
+1. BatchNorm improves stability in neural networks
+2. RMSprop and Adam optimizers outperform SGD
+3. L1 regularization more effective than L2 for this dataset
 
-2. **Notable Observations**
-   - Combination of BatchNorm with L1 regularization provides superior results
-   - Too aggressive regularization (Instance 4) can severely impact performance
-   - Moderate-sized architectures outperform deeper networks
+### Recommendations
+1. **For Production Deployment**
+   - Consider XGBoost as primary model
+   - Use RMSprop_L1_BatchNorm neural network as complementary model
+   - Implement ensemble approach for robust predictions
 
-## Conclusion
-The analysis reveals that the combination of RMSprop optimizer with L1 regularization and BatchNorm (Instance 5) provides the most robust performance for freight cost prediction. This configuration achieves the best balance between model complexity and regularization, resulting in superior accuracy (72.67%) and consistent performance across all metrics (F1: 0.72462, Precision: 0.72372, Recall: 0.72674).
+2. **For Further Improvement**
+   - Experiment with deeper architectures in neural networks
+   - Fine-tune XGBoost hyperparameters further
+   - Collect more training data for underperforming classes
 
-## Future Recommendations
-
-1. **Fine-tuning Opportunities**
-   - Experiment with learning rate schedules for RMSprop
-   - Investigate different BatchNorm configurations
-   - Test variations of L1 regularization strength
-
-2. **Architecture Optimization**
-   - Focus on 4-layer architectures with varied neuron configurations
-   - Explore residual connections for better gradient flow
-   - Consider layer size optimization
-
-3. **Regularization Strategy**
-   - Further explore L1 + BatchNorm combinations
-   - Test graduated regularization strategies
-   - Investigate adaptive regularization techniques
+## Future Work
+1. Implement ensemble methods combining both approaches
+2. Explore advanced architectures for neural networks
+3. Investigate feature engineering opportunities
+4. Consider adding more evaluation metrics
